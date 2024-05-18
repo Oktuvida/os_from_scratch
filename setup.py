@@ -2,37 +2,34 @@ import sys
 import subprocess
 import shutil
 import os
-from collections import defaultdict
-from typing import Callable
 
 ASM = "nasm"
 
+build_dir = "build"
 bootstrap_file = os.path.join("src", "bootstrap", "bootstrap.asm")
-bootstrap_output = os.path.join("build", "bootstrap.o")
+bootstrap_output = os.path.join(build_dir, "bootstrap.o")
 
 kernel_file = os.path.join("src", "kernel", "simple_kernel.asm")
-kernel_output = os.path.join("build", "simple_kernel.o")
-kernel_image = os.path.join("build", "kernel.img")
+kernel_output = os.path.join(build_dir, "simple_kernel.o")
+kernel_image = os.path.join(build_dir, "kernel.img")
 
 
 def main() -> None:
     argv = sys.argv
     func = argv[-1]
-    funcs = get_funcs()
+    run_func(func)
+
+
+def run_func(func: str) -> None:
+    funcs = {"build_kernel": build_kernel, "run_kernel": run_kernel}
+    if func not in funcs:
+        print("FUNCTION NOT PRESENT")
+        return
     funcs[func]()
 
 
-def get_funcs() -> dict[str, Callable[[], None]]:
-    def default_value():
-        return lambda: print("FUNCTION NOT PRESENT")
-
-    return defaultdict(
-        default_value, {"build_kernel": build_kernel, "run_kernel": run_kernel}
-    )
-
-
 def build_kernel() -> None:
-    recreate_directory("build")
+    recreate_directory(build_dir)
     run_command(f"{ASM} -f bin {bootstrap_file} -o {bootstrap_output}")
     run_command(f"{ASM} -f bin {kernel_file} -o {kernel_output}")
     create_kernel_image()
