@@ -25,5 +25,5 @@ print_char:
 done:
     ret
     
-hello_string db 'Hello World!, From Simple Assembly 539kernel!', 0
+hello_string db 'Hello World!', 0
 

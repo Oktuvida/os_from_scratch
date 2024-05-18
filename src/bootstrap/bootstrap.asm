@@ -72,7 +72,7 @@ printing_finished:
 
     ret
 
-title_string        db  'The Bootloader of 539kernel.', 0
+title_string        db  'Basic Bootloader', 0
 message_string      db  'The kernel is loading...', 0   ; string to be printed (0 indicates end of str)
 load_error_string   db  'The kernel cannot be loaded', 0
 times 510-($-$$) db 0 ; remaining empty space in bootloader
