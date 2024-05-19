@@ -1,81 +1,84 @@
 start:
-    mov ax, 07C0h ; Move hexadecimal 07C0 to the register ax
-    mov ds, ax    ; Move value to ds (data segment) through ax
+    mov ax, 07C0h               ; Set AX to 07C0h, the segment address where the bootloader is loaded
+    mov ds, ax                  ; Set Data Segment (DS) to the value in AX
 
-    mov si, title_string ; print title_string
-    call print_string    ; memadd of the string as a parameter in register si
+    mov si, title_string        ; Set SI to point to the 'title_string'
+    call print_string           ; Call 'print_string' function to print the title string
 
-    mov si, message_string ; print message_string
-    call print_string    ; memadd of the string as a parameter in register si
+    mov si, message_string      ; Set SI to point to the 'message_string'
+    call print_string           ; Call 'print_string' function to print the message string
 
-    ; MOST IMPORTANT PART OF BOOTLOADER
-    call load_kernel_from_disk ; call function
-    jmp 0900h:0000  ; gives control to kernel by jumping to starting point (same values set in ax and bx(offset) registers)  
-    ; both parts combined represent the memory address that we have loaded our kernel into 
-
-    
-
-
-
+    call load_kernel_from_disk  ; Call 'load_kernel_from_disk' function to load the kernel into memory
+    jmp 0900h:0000             ; Jump to the memory location 0900h:0000 to start executing the kernel
 
 load_kernel_from_disk:
-    mov ax, 0900h
-    mov es, ax ; set 0900h on register es
+    mov ax, [curr_sector_to_load] ; Move the current sector to load into AX
+    sub ax, 2                     ; Subtract 2 from AX (adjust for sector numbering starting at 1)
+    mov bx, 512d                  ; Move 512 (bytes per sector) into BX
+    mul bx                        ; Multiply AX by BX (calculate offset)
+    mov bx, ax                    ; Move the result into BX (offset for loading)
 
-    ; load kernel from the disk into memory
-    ; by using BIOS Service 13h - related to hard disks
-    mov ah, 02h ; in BIOS AH often holds function number, 02h specifies the function number for reading sectors from the hard disk
-    mov al, 01h ; in BIOS AL often holds parameters, 01h is the number of sectors to read from the disk (1 sector as kernel won't exceed 512 bytes)
-    mov ch, 0h  ; ch holds the number of tracks we'd like to read from, in this case, track 0
-    mov cl, 02h ; register cl is the sector number that we would like to read its content (second)
-    mov dh, 0h  ; head number
-    mov dl, 80h ; register dl specifies type of disk to read, 80h means reading from hd #0
-    mov bx, 0h  ; value of bx: memory address that the content will be loaded into (reading one sector and it will be stored on 0h)
-    int 13h ; when all donce correctly, BIOS service will set cf = 0
+    mov ax, 0900h                 ; Move segment address 0900h into AX
+    mov es, ax                    ; Set Extra Segment (ES) to the value in AX
 
-    jc kernel_load_error ; conditional that jumps when cf = 1, when kernel isn't loaded correctly
+    mov ah, 02h                   ; Set function number for disk read
+    mov al, 1h                    ; Set AL to read 1 sector
+    mov ch, 0h                    ; Set CH to cylinder number 0
+    mov cl, [curr_sector_to_load] ; Set CL to the current sector to load
+    mov dh, 0h                    ; Set DH to head number 0
+    mov dl, 80h                   ; Set DL to drive number (80h for the first HDD)
+    int 13h                       ; Call interrupt 13h to read from disk
 
-    ret ; end function (return to main code)
+    jc kernel_load_error          ; If carry flag is set (error), jump to 'kernel_load_error'
 
-kernel_load_error: ; function to print error when loading
-    mov si, load_error_string
-    call print_string
+    sub byte [number_of_sectors_to_load], 1 ; Subtract 1 from the number of sectors to load
+    add byte [curr_sector_to_load], 1       ; Add 1 to the current sector to load
+    cmp byte [number_of_sectors_to_load], 0 ; Compare the number of sectors to load with 0
 
-    jmp $ ; infinite loop to jump program to current address, halting the execution
+    jne load_kernel_from_disk     ; If not equal, jump back to 'load_kernel_from_disk'
+
+    ret                           ; Return from the function
+
+kernel_load_error:
+    mov si, load_error_string     ; Set SI to point to the 'load_error_string'
+    call print_string             ; Call 'print_string' function to print the error string
+
+    jmp $                         ; Jump to current address (infinite loop)
 
 print_string:
-    mov ah, 0Eh ; BIOS service number is loaded in ah
+    mov ah, 0Eh                   ; Set function number for teletype output
 
 print_char:
-    lodsb ; transfer first character of string to al and increase value of si by 1 byte
+    lodsb                         ; Load byte at address SI into AL, increment SI
+    cmp al, 0                     ; Compare AL with 0 (end of string)
+    je printing_finished          ; If equal, jump to 'printing_finished'
 
-    cmp al, 0 ; if al is zero then end of string has been reached
-    je printing_finished ; then jump to  printing_finished label
+    int 10h                       ; Call interrupt 10h to print character in AL
 
-    int 10h ; if not then 10h called to print content on register al
-    
-    jmp print_char ; jump to print char to repeat operation until end of string has been reached
+    jmp print_char                ; Jump back to 'print_char' to print the next character
 
 printing_finished:
-    mov al, 10d ; Print new line (represented by 10 in ASCII)
-    int 10h
-    
-    ; Reading current cursor position
-    mov ah, 03h
-    mov bh, 0
-    int 10h
-    
-    ; Move the cursor to the beginning
-    mov ah, 02h
-    mov dl, 0
-    int 10h
+    mov al, 10d                   ; Move newline character into AL
+    int 10h                       ; Call interrupt 10h to print newline
 
-    ret
+    ; Reading current cursor position
+    mov ah, 03h                   ; Set function number for reading cursor position
+    mov bh, 0                     ; Set display page number to 0
+    int 10h                       ; Call interrupt 10h to read cursor position
+
+    ; Move the cursor to the beginning
+    mov ah, 02h                   ; Set function number for setting cursor position
+    mov dl, 0                     ; Set column number to 0
+    int 10h                       ; Call interrupt 10h to set cursor position
+
+    ret                           ; Return from the function
 
 title_string        db  'Basic Bootloader', 0
-message_string      db  'The kernel is loading...', 0   ; string to be printed (0 indicates end of str)
+message_string      db  'The kernel is loading...', 0   ; String to be printed (0 indicates end of string)
 load_error_string   db  'The kernel cannot be loaded', 0
-times 510-($-$$) db 0 ; remaining empty space in bootloader
-dw 0xAA55 ; set last 2 bytes of bootloader to 0xAA55 - standard used in x86 bl to indicate BIOS thisis a valid bootloader
+number_of_sectors_to_load  db  10d
+curr_sector_to_load         db  2d
 
+times 510-($-$$) db 0       ; Fill the remainder of the 512-byte sector with zeros
 
+dw 0xAA55                   ; Boot signature (0xAA55) indicating a valid bootable disk
