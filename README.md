@@ -7,7 +7,9 @@ Construction of a basic operating system inspired by 539Kernel[^1]
 ### Requirements
 
 - [`nasm`](https://www.nasm.us/)
+- [`gcc`](https://gcc.gnu.org/)
 - [`python 3`](https://www.python.org/)
+- GNU Utils ([`objcopy`](https://sourceware.org/binutils/docs/binutils/objcopy.html))
 
 
 ### Steps
