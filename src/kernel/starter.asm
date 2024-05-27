@@ -84,8 +84,8 @@ start_kernel:                 ; Label for the start of the kernel
 	
     call kernel_main          ; Call the kernel's main function
 	
-%include "src/kernel/gdt.asm" ; Include the contents of the file "gdt.asm"
-%include "src/kernel/idt.asm" ; Include the contents of the file "idt.asm"
+%include "gdt.asm" ; Include the contents of the file "gdt.asm"
+%include "idt.asm" ; Include the contents of the file "idt.asm"
 
 tss:
     dd 0

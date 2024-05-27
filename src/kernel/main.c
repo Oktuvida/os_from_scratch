@@ -1,12 +1,5 @@
 #include "screen.h"
-#include "screen.c"
-
-
-screen_init();
-
-void print(char *);  // Function prototype for printing a string
-void println();      // Function prototype for printing a newline
-void printi(int);    // Function prototype for printing an integer
+#include "scheduler.h"
 
 void processA();
 void processB();
@@ -15,18 +8,23 @@ void processD();
 
 void kernel_main()
 {
+	process_t p1, p2, p3, p4;
+	
+	screen_init();
+	process_init();
+	scheduler_init();
+	
     print("Welcome!");
     println();
     print("We are now in Protected-mode");
     println();
-    process_t p1, p2, p3, p4;
-    
+	
     process_create( &processA, &p1 );
     process_create( &processB, &p2 );
     process_create( &processC, &p3 );
     process_create( &processD, &p4 );
-    while (1)          // Infinite loop to keep the kernel running
-        ;
+	
+	while( 1 );
 }
 
 void interrupt_handler(int interrupt_number)

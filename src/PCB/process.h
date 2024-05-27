@@ -13,9 +13,9 @@ typedef struct process
     int *base_address;
 } process_t;
 
-process_t *processes[ 15 ]; //max number of processes
+extern process_t *processes[ 15 ]; //max number of processes
 
-int processes_count, curr_pid;
+extern int processes_count, curr_pid;
 
 void process_init();
 void process_create( int *, process_t * );

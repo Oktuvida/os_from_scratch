@@ -1,5 +1,8 @@
 #include "process.h"
 
+int processes_count = 0, curr_pid = 0;
+process_t *processes[ 15 ]; //max number of processes
+
 void process_init()
 {
     processes_count = 0;

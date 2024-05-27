@@ -1,8 +1,8 @@
 #include "process.h"
 
-int next_sch_pid, curr_sch_pid;
+extern int next_sch_pid, curr_sch_pid;
 
-process_t *next_process;
+extern process_t *next_process;
 
 void scheduler_init();
 process_t *get_next_process();
