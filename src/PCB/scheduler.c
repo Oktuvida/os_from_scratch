@@ -1,4 +1,5 @@
 #include "scheduler.h"
+#include "screen.h"
 
 int next_sch_pid, curr_sch_pid;
 process_t *next_process;
