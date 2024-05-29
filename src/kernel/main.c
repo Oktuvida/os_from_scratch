@@ -6,25 +6,25 @@ void processB();
 void processC();
 void processD();
 
+void create_landing_page();
+
 void kernel_main()
 {
-	process_t p1, p2, p3, p4;
-	
-	screen_init();
-	process_init();
-	scheduler_init();
-	
-    print("Welcome!");
-    println();
-    print("We are now in Protected-mode");
-    println();
-	
-    process_create( &processA, &p1 );
-    process_create( &processB, &p2 );
-    process_create( &processC, &p3 );
-    process_create( &processD, &p4 );
-	
-	while( 1 );
+    process_t p1, p2, p3, p4;
+
+    screen_init();
+    process_init();
+    scheduler_init();
+
+    create_landing_page();
+
+    process_create(&processA, &p1);
+    process_create(&processB, &p2);
+    process_create(&processC, &p3);
+    process_create(&processD, &p4);
+
+    while (1)
+        ;
 }
 
 void interrupt_handler(int interrupt_number)
@@ -34,35 +34,50 @@ void interrupt_handler(int interrupt_number)
     printi(interrupt_number);
 }
 
+void create_landing_page()
+{
+    currColor = Red;
+    print_on_entire_line("#", '#', '#');
+    println();
+
+    print_on_entire_line("Welcome to os_from_scratch!", '#', ' ');
+    println();
+    print_on_entire_line("We are now in Protected-mode", '#', ' ');
+    println();
+
+    print_on_entire_line("#", '#', '#');
+    println();
+    currColor = White;
+}
 
 void processA()
 {
-    print( "Process A," );
+    print("Process A,");
 
-    while ( 1 )
-        asm( "mov $5390, %eax" );
+    while (1)
+        asm("mov $5390, %eax");
 }
 
 void processB()
 {
-    print( "Process B," );
+    print("Process B,");
 
-    while ( 1 )
-        asm( "mov $5391, %eax" );
+    while (1)
+        asm("mov $5391, %eax");
 }
 
 void processC()
 {
-    print( "Process C," );
+    print("Process C,");
 
-    while ( 1 )
-        asm( "mov $5392, %eax" );
+    while (1)
+        asm("mov $5392, %eax");
 }
 
 void processD()
 {
-    print( "Process D," );
+    print("Process D,");
 
-    while ( 1 )
-        asm( "mov $5393, %eax" );
+    while (1)
+        asm("mov $5393, %eax");
 }
