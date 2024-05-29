@@ -2,6 +2,10 @@
 
 Construction of a basic operating system inspired by 539Kernel[^1]
 
+<p align="center">
+    <img width="460" height="300" src="assets/os_execution_ss.png">
+</p>
+
 ## Execution
 
 ### Requirements
