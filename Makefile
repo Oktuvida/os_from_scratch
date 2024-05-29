@@ -6,11 +6,13 @@ KERNEL_FILES = main.c
 KERNEL_FLAGS = -Wall -m32 -c -ffreestanding -fno-asynchronous-unwind-tables -fno-pie
 KERNEL_OBJECT = -o kernel.elf
 
-run:
-	rm -rf build
-	mkdir build
-	find ./src -type f -exec cp {} build \;
-	cd build; \
+BUILD_DIR = dist
+
+build:
+	rm -rf $(BUILD_DIR)
+	mkdir $(BUILD_DIR)
+	find ./src -type f -exec cp {} $(BUILD_DIR) \;
+	cd $(BUILD_DIR); \
 		$(ASM) -f bin $(BOOTSTRAP_FILE) -o bootstrap.o && \
 		$(ASM) -f elf32 $(INIT_KERNEL_FILES) -o starter.o && \
 		$(CC) $(KERNEL_FLAGS) $(KERNEL_FILES) $(KERNEL_OBJECT) && \
@@ -21,5 +23,11 @@ run:
 		objcopy -O binary 539kernel.elf 539kernel.bin && \
 		dd if=bootstrap.o of=kernel.img && \
 		dd seek=1 conv=sync if=539kernel.bin of=kernel.img bs=512 count=8 && \
-		dd seek=9 conv=sync if=/dev/zero of=kernel.img bs=512 count=2046 && \
-		qemu-system-x86_64 -s kernel.img
+		dd seek=9 conv=sync if=/dev/zero of=kernel.img bs=512 count=2046
+
+run:
+		cd $(BUILD_DIR) && \
+			qemu-system-x86_64 -s kernel.img
+
+clean:
+	rm -rf $(BUILD_DIR)
