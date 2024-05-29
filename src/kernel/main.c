@@ -1,5 +1,6 @@
 #include "screen.h"
 #include "scheduler.h"
+#include "heap.h"
 
 void processA();
 void processB();
@@ -10,18 +11,20 @@ void create_landing_page();
 
 void kernel_main()
 {
-    process_t p1, p2, p3, p4;
+    process_t *p1, *p2, *p3, *p4;
 
+    heap_init();
+    paging_init();
     screen_init();
     process_init();
     scheduler_init();
 
     create_landing_page();
 
-    process_create(&processA, &p1);
-    process_create(&processB, &p2);
-    process_create(&processC, &p3);
-    process_create(&processD, &p4);
+    p1 = process_create(&processA);
+    p2 = process_create(&processB);
+    p3 = process_create(&processC);
+    p4 = process_create(&processD);
 
     while (1)
         ;

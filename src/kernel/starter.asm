@@ -3,6 +3,10 @@ extern kernel_main            ; Declare an external reference to the kernel's ma
 extern interrupt_handler      ; Declare an external reference to the interrupt handler function
 extern scheduler              ; Declare an external reference to the scheduler function
 extern run_next_process       ; Declare an external reference to the function to run the next process
+extern page_directory
+
+global load_page_directory
+global enable_paging
 
 start:                        ; Label marking the start of the bootloader
     mov ax, cs                ; Copy the Code Segment register's value into AX
@@ -125,6 +129,19 @@ start_kernel:                 ; Label marking the start of the kernel
     sti                       ; Enable interrupts by setting the interrupt flag
 
     call kernel_main          ; Call the kernel's main function
+
+load_page_directory:
+    mov eax, [page_directory]
+    mov cr3, eax
+    
+    ret
+    
+enable_paging:
+    mov eax, cr0
+    or eax, 80000000h
+    mov cr0, eax
+    
+    ret
 
 %include "gdt.asm"            ; Include the Global Descriptor Table definitions
 %include "idt.asm"            ; Include the Interrupt Descriptor Table definitions

@@ -1,18 +1,21 @@
 #include "screen.h"
 
-volatile unsigned char *video = 0xB8000;
+volatile unsigned char *video;
 
-int nextTextPos = 0;
-int currLine = 0;
-int lineSize = 80;
+int nextTextPos;
+int currLine;
+int lineSize;
 
-color currColor = White;
+color currColor;
 
 void screen_init()
 {
     video = 0xB8000;
     nextTextPos = 0;
     currLine = 0;
+
+    lineSize = 80;
+    currColor = White;
 }
 
 void print_on_entire_line(char *str, char delimiter, char spacing)

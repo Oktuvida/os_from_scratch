@@ -1,7 +1,8 @@
 #include "process.h"
+#include "heap.h"
 
-int processes_count = 0, curr_pid = 0;
-process_t *processes[ 15 ]; //max number of processes
+int processes_count, curr_pid;
+process_t *processes[15]; // max number of processes
 
 void process_init()
 {
@@ -9,10 +10,11 @@ void process_init()
     curr_pid = 0;
 }
 
-void process_create( int *base_address, process_t *process )
-{   
+process_t *process_create(int *base_address)
+{
+    process_t *process = kalloc(sizeof(process_t));
     process->pid = curr_pid++;
-    
+
     process->context.eax = 0;
     process->context.ecx = 0;
     process->context.edx = 0;
@@ -22,11 +24,13 @@ void process_create( int *base_address, process_t *process )
     process->context.esi = 0;
     process->context.edi = 0;
     process->context.eip = base_address;
-    
+
     process->state = READY;
     process->base_address = base_address;
-    
-    processes[ process->pid ] = process;
-    
+
+    processes[process->pid] = process;
+
     processes_count++;
+
+    return process;
 }
